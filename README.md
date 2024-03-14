@@ -1,3 +1,5 @@
+[![test](https://github.com/ks6088ts/template-python/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/ks6088ts/template-python/actions/workflows/test.yml?query=branch%3Amain)
+
 # template-python
 
 This is a template repository for a Python
