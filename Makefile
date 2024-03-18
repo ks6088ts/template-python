@@ -14,7 +14,7 @@ install-deps-dev: ## install dependencies for development
 
 .PHONY: install-deps
 install-deps: ## install dependencies for production
-	poetry install --only-root
+	poetry install --without dev
 
 .PHONY: format-check
 format-check: ## format check
