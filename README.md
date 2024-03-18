@@ -31,3 +31,23 @@ make test
 # run CI tests
 make ci-test
 ```
+
+### Docker development
+
+```shell
+# build docker image
+make docker-build
+
+# run docker container
+make docker-run
+
+# run CI tests in docker container
+make ci-test-docker
+```
+
+To publish the docker image to Docker Hub, you need to set the following secrets in the repository settings.
+
+```shell
+gh secret set DOCKERHUB_USERNAME --body $DOCKERHUB_USERNAME
+gh secret set DOCKERHUB_TOKEN --body $DOCKERHUB_TOKEN
+```
