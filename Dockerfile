@@ -1,24 +1,24 @@
+FROM python:3.11.8-slim-bookworm as requirements-stage
+
+WORKDIR /tmp
+
+RUN pip install --no-cache-dir poetry==1.8.2
+
+COPY ./pyproject.toml ./poetry.lock* /tmp/
+
+RUN poetry export --without=dev -f requirements.txt --output requirements.txt --without-hashes
+
 FROM python:3.11.8-slim-bookworm
 
 ARG GIT_REVISION="0000000"
 ARG GIT_TAG="x.x.x"
 
 WORKDIR /app
-# hadolint ignore=DL3008
-RUN apt-get update \
-    && apt-get install --no-install-recommends -y \
-    curl \
-    make \
-    && rm -rf /var/lib/apt/lists/*
 
-# Install poetry: https://python-poetry.org/docs/#installing-with-the-official-installer
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN curl -sSL https://install.python-poetry.org | python3 -
-ENV PATH="/root/.local/bin:$PATH"
+COPY --from=requirements-stage /tmp/requirements.txt /app/requirements.txt
+COPY . .
 
 # Install dependencies
-COPY pyproject.toml poetry.lock Makefile /app/
-RUN poetry config virtualenvs.create false && make install-deps
-COPY . .
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 CMD ["python", "main.py"]
