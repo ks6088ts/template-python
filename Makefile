@@ -1,6 +1,6 @@
 # Git
 GIT_REVISION ?= $(shell git rev-parse --short HEAD)
-GIT_TAG ?= $(shell git describe --tags --abbrev=0 | sed -e s/v//g)
+GIT_TAG ?= $(shell git describe --tags --abbrev=0 --always | sed -e s/v//g)
 
 .PHONY: help
 help:
