@@ -7,6 +7,11 @@ help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 .DEFAULT_GOAL := help
 
+.PHONY: info
+info: ## show information
+	@echo "GIT_REVISION: $(GIT_REVISION)"
+	@echo "GIT_TAG: $(GIT_TAG)"
+
 .PHONY: install-deps-dev
 install-deps-dev: ## install dependencies for development
 	poetry install
