@@ -1,4 +1,4 @@
-FROM python:3.11.8-slim-bookworm as requirements-stage
+FROM python:3.12.3-slim-bookworm as requirements-stage
 
 WORKDIR /tmp
 
@@ -8,7 +8,7 @@ COPY ./pyproject.toml ./poetry.lock* /tmp/
 
 RUN poetry export --without=dev -f requirements.txt --output requirements.txt --without-hashes
 
-FROM python:3.11.8-slim-bookworm
+FROM python:3.12.3-slim-bookworm
 
 ARG GIT_REVISION="0000000"
 ARG GIT_TAG="x.x.x"
