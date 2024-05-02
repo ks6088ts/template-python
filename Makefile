@@ -27,6 +27,7 @@ format-check: ## format check
 
 .PHONY: format
 format: ## format code
+	poetry run isort .
 	poetry run black . --verbose
 
 .PHONY: lint
