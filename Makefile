@@ -30,6 +30,10 @@ format: ## format code
 	poetry run isort .
 	poetry run black . --verbose
 
+.PHONY: fix
+fix: format ## apply auto-fixes
+	poetry run ruff check --fix
+
 .PHONY: lint
 lint: ## lint
 	poetry run ruff check .
