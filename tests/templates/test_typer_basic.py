@@ -1,6 +1,6 @@
 from typer.testing import CliRunner
 
-from scripts.example_typer import app
+from templates.typer_basic import app
 
 runner = CliRunner()
 
