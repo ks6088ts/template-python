@@ -40,7 +40,7 @@ lint: ## lint
 
 .PHONY: test
 test: ## run tests
-	poetry run pytest --capture=no
+	poetry run pytest --capture=no -vv
 
 .PHONY: ci-test
 ci-test: install-deps-dev format-check lint test ## run CI tests
