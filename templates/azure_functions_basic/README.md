@@ -2,12 +2,22 @@
 
 ## Usage
 
+### Bootstrap a new project
+
 ```shell
-mkdir azure_functions_basic
+# To bootstrap a new project, run the following commands
+mkdir templates/azure_functions_basic
 cd azure_functions_basic
 
 # Create a new Azure Functions project
 func init --python --docker
+```
+
+### Development
+
+```shell
+# Export poetry dependencies
+poetry export --with=azure-functions -f requirements.txt --output ./templates/azure_functions_basic/requirements.txt --without-hashes
 
 # Create virtual environment
 python -m venv .venv
@@ -22,10 +32,14 @@ pip install -r requirements.txt
 func start --verbose
 ```
 
-## Deploy
+### Deployment
 
 ```shell
+# Export poetry dependencies
+poetry export --with=azure-functions -f requirements.txt --output ./templates/azure_functions_basic/requirements.txt --without-hashes
+
 # Deploy resources to Azure
+cd templates/azure_functions_basic
 bash scripts/deploy_resources.sh
 
 # Deploy the Function App to Azure
