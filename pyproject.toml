@@ -27,6 +27,12 @@ pydantic-settings = "^2.4.0"
 streamlit = "^1.38.0"
 openai = "^1.44.0"
 
+
+[tool.poetry.group.azure-functions.dependencies]
+python-dotenv = "^1.0.1"
+fastapi = "^0.114.0"
+azure-functions = "^1.20.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

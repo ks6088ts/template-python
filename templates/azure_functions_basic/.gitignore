@@ -48,5 +48,4 @@ __queuestorage__
 __azurite_db*__.json
 
 # Project
-!requirements.txt
 !local.settings.json
