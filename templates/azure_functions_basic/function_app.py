@@ -1,6 +1,10 @@
 import azure.functions as func
-import datetime
-import json
-import logging
+from core import app as fastapi_app
+from dotenv import load_dotenv
 
-app = func.FunctionApp()
+load_dotenv()
+
+app = func.AsgiFunctionApp(
+    app=fastapi_app,
+    http_auth_level=func.AuthLevel.ANONYMOUS,
+)
