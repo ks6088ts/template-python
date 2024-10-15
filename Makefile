@@ -23,12 +23,11 @@ install-deps: ## install dependencies for production
 
 .PHONY: format-check
 format-check: ## format check
-	poetry run black . --check --verbose
+	poetry run ruff format --check --verbose
 
 .PHONY: format
 format: ## format code
-	poetry run isort .
-	poetry run black . --verbose
+	poetry run ruff format --verbose
 
 .PHONY: fix
 fix: format ## apply auto-fixes
