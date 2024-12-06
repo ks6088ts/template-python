@@ -33,3 +33,4 @@ jobs:
         shell: bash
         run: |
           make ci-test
+          make ci-test-docs
