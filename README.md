@@ -11,7 +11,7 @@ This is a template repository for Python
 ## Prerequisites
 
 - [Python 3.10+](https://www.python.org/downloads/)
-- [Poetry](https://python-poetry.org/docs/#installation)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
 - [GNU Make](https://www.gnu.org/software/make/)
 
 ## Development instructions
