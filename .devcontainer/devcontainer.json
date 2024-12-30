@@ -1,7 +1,7 @@
 {
     "name": "template-python",
     // https://mcr.microsoft.com/en-us/product/devcontainers/python/tags
-    "image": "mcr.microsoft.com/devcontainers/python:dev-3.10-bookworm",
+    "image": "mcr.microsoft.com/devcontainers/python:dev-3.13-bookworm",
     "customizations": {
         "vscode": {
             "extensions": [

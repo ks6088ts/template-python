@@ -53,7 +53,7 @@ DOCKER_COMMAND ?= python template_python/core.py
 
 # Tools
 TOOLS_DIR ?= $(HOME)/.local/bin
-TRIVY_VERSION ?= 0.56.2
+TRIVY_VERSION ?= 0.58.1
 
 .PHONY: docker-build
 docker-build: ## build Docker image
