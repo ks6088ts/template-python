@@ -51,7 +51,7 @@ make ci-test-docker
 
 ### Docker Hub
 
-To publish the docker image to Docker Hub, you need to set the following secrets in the repository settings.
+To publish the docker image to Docker Hub, you need to [create access token](https://app.docker.com/settings/personal-access-tokens/create) and set the following secrets in the repository settings.
 
 ```shell
 gh secret set DOCKERHUB_USERNAME --body $DOCKERHUB_USERNAME
