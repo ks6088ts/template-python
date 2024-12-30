@@ -52,7 +52,7 @@ DOCKER_IMAGE_NAME ?= template-python
 DOCKER_COMMAND ?= python template_python/core.py
 
 # Tools
-TOOLS_DIR ?= $(HOME)/.local/bin
+TOOLS_DIR ?= /usr/local/bin
 TRIVY_VERSION ?= 0.58.1
 
 .PHONY: docker-build
