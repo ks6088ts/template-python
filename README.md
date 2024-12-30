@@ -47,6 +47,10 @@ make docker-run
 make ci-test-docker
 ```
 
+## Deployment instructions
+
+### Docker Hub
+
 To publish the docker image to Docker Hub, you need to set the following secrets in the repository settings.
 
 ```shell
