@@ -44,6 +44,10 @@ test: ## run tests
 .PHONY: ci-test
 ci-test: install-deps-dev format-check lint test ## run CI tests
 
+.PHONY: upgrade
+upgrade: ## upgrade dependencies
+	uv lock --upgrade
+
 # ---
 # Docker
 # ---
