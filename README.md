@@ -30,9 +30,6 @@ make install-deps-dev
 # run tests
 make test
 
-# run type checking
-make typecheck
-
 # run CI tests
 make ci-test
 ```

@@ -36,9 +36,6 @@ fix: format ## apply auto-fixes
 .PHONY: lint
 lint: ## lint
 	uv run ruff check .
-
-.PHONY: typecheck
-typecheck: ## run type checking
 	uv run ty check
 
 .PHONY: test
@@ -46,7 +43,7 @@ test: ## run tests
 	uv run pytest --capture=no -vv
 
 .PHONY: ci-test
-ci-test: install-deps-dev format-check lint typecheck test ## run CI tests
+ci-test: install-deps-dev format-check lint test ## run CI tests
 
 .PHONY: update
 update: ## update packages
