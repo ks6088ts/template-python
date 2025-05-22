@@ -36,6 +36,7 @@ fix: format ## apply auto-fixes
 .PHONY: lint
 lint: ## lint
 	uv run ruff check .
+	uv run ty check
 
 .PHONY: test
 test: ## run tests
