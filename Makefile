@@ -49,6 +49,10 @@ ci-test: install-deps-dev format-check lint test ## run CI tests
 update: ## update packages
 	uv lock --upgrade
 
+.PHONY: jupyterlab
+jupyterlab: ## run Jupyter Lab
+	uv run jupyter lab
+
 # ---
 # Docker
 # ---
