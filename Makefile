@@ -93,6 +93,10 @@ ci-test-docker: docker-lint docker-build docker-scan docker-run ## run CI test f
 # Docs
 # ---
 
+.PHONY: install-deps-docs
+install-deps-docs: ## install dependencies for documentation
+	uv sync --group docs
+
 .PHONY: docs
 docs: ## build documentation
 	uv run mkdocs build
@@ -102,4 +106,4 @@ docs-serve: ## serve documentation
 	uv run mkdocs serve
 
 .PHONY: ci-test-docs
-ci-test-docs: docs ## run CI test for documentation
+ci-test-docs: install-deps-docs docs ## run CI test for documentation
