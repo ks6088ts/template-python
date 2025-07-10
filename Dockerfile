@@ -8,6 +8,9 @@ COPY ./pyproject.toml ./uv.lock /tmp/
 
 RUN uv export --format requirements-txt --no-dev --no-hashes --output-file requirements.txt
 
+# Delete `-e .` line from requirements.txt
+RUN sed -i '/^-e .*/d' requirements.txt
+
 FROM python:3.13-slim-bookworm
 
 ARG GIT_REVISION="0000000"
@@ -15,10 +18,13 @@ ARG GIT_TAG="x.x.x"
 
 WORKDIR /app
 
+# Copy requirements first for better cache efficiency
 COPY --from=requirements-stage /tmp/requirements.txt /app/requirements.txt
-COPY . .
 
-# Install dependencies
+# Install dependencies in a separate layer for caching
 RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+
+# Copy application code after dependencies are installed
+COPY . .
 
 CMD ["python", "template_python/core.py"]
