@@ -6,10 +6,9 @@ RUN pip install --no-cache-dir uv==0.7.12
 
 COPY ./pyproject.toml ./uv.lock /tmp/
 
-RUN uv export --format requirements-txt --no-dev --no-hashes --output-file requirements.txt
-
 # Delete `-e .` line from requirements.txt
-RUN sed -i '/^-e .*/d' requirements.txt
+RUN uv export --format requirements-txt --no-dev --no-hashes --output-file requirements.txt && \
+    sed -i '/^-e .*/d' requirements.txt
 
 FROM python:3.13-slim-bookworm
 
