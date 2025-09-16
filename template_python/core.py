@@ -1,12 +1,14 @@
-import logging
+from logging import DEBUG
 
-logger = logging.getLogger(__name__)
+from template_python.loggers import get_logger
+
+logger = get_logger(__name__)
 
 
 def hello_world(verbose: bool = False):
     if verbose:
-        logging.basicConfig(level=logging.DEBUG)
-    logging.debug("Hello World")
+        logger.setLevel(DEBUG)
+    logger.debug("Hello World")
 
 
 if __name__ == "__main__":

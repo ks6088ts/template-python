@@ -1,11 +1,11 @@
 import logging
-from logging import getLogger
 
 import pytest
 
 from template_python.core import hello_world
+from template_python.loggers import get_logger
 
-logger = getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @pytest.fixture(scope="session")

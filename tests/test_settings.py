@@ -1,11 +1,11 @@
-import logging
-from logging import getLogger
+from logging import DEBUG
 
 from dotenv import load_dotenv
 
+from template_python.loggers import get_logger
 from template_python.settings import Settings
 
-logger = getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def test_settings(caplog):
@@ -14,7 +14,7 @@ def test_settings(caplog):
     and prints a debug message correctly.
     """
     logger.info("[TEST] Running test_settings")
-    with caplog.at_level(logging.DEBUG):
+    with caplog.at_level(DEBUG):
         assert load_dotenv(
             dotenv_path=".env.template",
             verbose=True,

@@ -1,9 +1,8 @@
 import logging
-from logging import getLogger
 
 from template_python.loggers import get_logger
 
-logger = getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def test_get_logger(caplog):
