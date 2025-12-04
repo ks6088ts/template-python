@@ -37,6 +37,7 @@ fix: format ## apply auto-fixes
 lint: ## lint
 	uv run ruff check .
 	uv run ty check
+	uv run pyrefly check
 
 .PHONY: test
 test: ## run tests
