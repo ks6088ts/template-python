@@ -4,6 +4,7 @@ from typing import Annotated
 import typer
 from dotenv import load_dotenv
 
+from template_python.core import hello_world
 from template_python.loggers import get_logger
 from template_python.settings import Settings
 
@@ -40,6 +41,7 @@ def hello(
 ):
     set_verbose_logging(verbose)
 
+    hello_world()
     logger.debug(f"This is a debug message with name: {name}")
     logger.info(f"Settings from .env: {Settings().model_dump_json(indent=2)}")
 
