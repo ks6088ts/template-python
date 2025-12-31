@@ -16,6 +16,7 @@ info: ## show information
 install-deps-dev: ## install dependencies for development
 	uv sync --all-groups
 	uv run pre-commit install
+	@which actionlint || echo "install actionlint https://github.com/rhysd/actionlint"
 
 .PHONY: install-deps
 install-deps: ## install dependencies for production
@@ -38,6 +39,7 @@ lint: ## lint
 	uv run ruff check .
 	uv run ty check
 	uv run pyrefly check
+	actionlint
 
 .PHONY: test
 test: ## run tests
