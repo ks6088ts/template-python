@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+    <url>
+        <loc>https://ks6088ts-labs.github.io/template-python/</loc>
+        <lastmod>2026-02-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="en" href="https://ks6088ts-labs.github.io/template-python/"/>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://ks6088ts-labs.github.io/template-python/ja/"/>
+    </url>
+    <url>
+        <loc>https://ks6088ts-labs.github.io/template-python/ja/</loc>
+        <lastmod>2026-02-20</lastmod>
+        <changefreq>daily</changefreq>
+        <xhtml:link rel="alternate" hreflang="ja" href="https://ks6088ts-labs.github.io/template-python/ja/"/>
+        <xhtml:link rel="alternate" hreflang="en" href="https://ks6088ts-labs.github.io/template-python/"/>
+    </url>
+</urlset>
