@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from template_python.core import hello_world
 from template_python.loggers import get_logger
-from template_python.settings import Settings
+from template_python.settings import get_project_settings
 
 app = typer.Typer(
     add_completion=False,
@@ -41,14 +41,12 @@ def hello(
 ):
     set_verbose_logging(verbose)
 
-    hello_world()
+    hello_world(verbose=verbose)
     logger.debug(f"This is a debug message with name: {name}")
-    logger.info(f"Settings from .env: {Settings().model_dump_json(indent=2)}")
+    logger.info(f"Settings from .env: {get_project_settings().model_dump_json(indent=2)}")
 
 
 if __name__ == "__main__":
-    assert load_dotenv(
-        override=True,
-        verbose=True,
-    ), "Failed to load environment variables"
+    if not load_dotenv(override=True, verbose=True):
+        logging.warning("No .env file found; using defaults")
     app()

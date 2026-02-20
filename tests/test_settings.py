@@ -10,8 +10,7 @@ logger = get_logger(__name__)
 
 def test_settings(caplog):
     """
-    Test the get_logger function to ensure it returns a logger instance
-    and prints a debug message correctly.
+    Test that Settings loads values correctly from the .env.template file.
     """
     logger.info("[TEST] Running test_settings")
     with caplog.at_level(DEBUG):
