@@ -65,7 +65,7 @@ DOCKER_COMMAND ?=
 
 # Tools
 TOOLS_DIR ?= /usr/local/bin
-TRIVY_VERSION ?= 0.58.1
+TRIVY_VERSION ?= 0.69.3
 
 .PHONY: docker-build
 docker-build: ## build Docker image
