@@ -1,19 +1,31 @@
 name: github-pages
+
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+# Only one Pages deployment may be in flight at a time.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # required for `mkdocs gh-deploy`
       - name: Configure Git Credentials
         run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
       - uses: actions/setup-python@v6
         with:
           python-version: 3.x
@@ -24,7 +36,7 @@ jobs:
           path: .cache
           restore-keys: |
             mkdocs-material-
-      - name: Set up uv with caching enabled
+      - name: Set up uv
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true

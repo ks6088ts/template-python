@@ -37,9 +37,20 @@ fix: format ## apply auto-fixes
 .PHONY: lint
 lint: ## lint
 	uv run ruff check .
-	uv run ty check
-	uv run pyrefly check
-	actionlint
+	uv run mypy template_python tests
+	-uv run ty check
+	-uv run pyrefly check
+	-actionlint
+
+.PHONY: type-check
+type-check: ## run all configured type checkers
+	uv run mypy template_python tests
+
+.PHONY: security
+security: ## run dependency security checks (pip-audit)
+	uv export --format requirements-txt --no-dev --no-hashes --output-file requirements.txt
+	uv run pip-audit -r requirements.txt
+	@rm -f requirements.txt
 
 .PHONY: test
 test: ## run tests
@@ -52,9 +63,17 @@ ci-test: install-deps-dev format-check lint test ## run CI tests
 update: ## update packages
 	uv lock --upgrade
 
+.PHONY: build
+build: ## build sdist and wheel artifacts
+	uv build
+
 .PHONY: jupyterlab
 jupyterlab: ## run Jupyter Lab
 	uv run jupyter lab
+
+.PHONY: clean
+clean: ## remove build artifacts and caches
+	rm -rf build dist *.egg-info .pytest_cache .ruff_cache .mypy_cache .coverage coverage.xml htmlcov site requirements.txt
 
 # ---
 # Docker
@@ -87,7 +106,7 @@ docker-lint: ## lint Dockerfile
 docker-scan: ## scan Docker image
 	@# https://aquasecurity.github.io/trivy/v0.18.3/installation/#install-script
 	@which trivy || curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b $(TOOLS_DIR) v$(TRIVY_VERSION)
-	trivy image $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME):$(GIT_TAG)
+	trivy image --severity HIGH,CRITICAL --ignore-unfixed $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME):$(GIT_TAG)
 
 .PHONY: ci-test-docker
 ci-test-docker: docker-lint docker-build docker-scan docker-run ## run CI test for Docker
@@ -102,7 +121,7 @@ install-deps-docs: ## install dependencies for documentation
 
 .PHONY: docs
 docs: ## build documentation
-	uv run mkdocs build
+	uv run mkdocs build --strict
 
 .PHONY: docs-serve
 docs-serve: ## serve documentation

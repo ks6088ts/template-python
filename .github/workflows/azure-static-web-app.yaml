@@ -1,12 +1,20 @@
 name: azure-static-web-apps
+
 on:
   workflow_dispatch:
   # Uncomment the following lines to enable automatic deployment on push to main branch
   # push:
   #   branches:
   #     - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
-  contents: write
+  contents: read
+  pull-requests: write  # required by the Azure SWA action when used on PRs
+
 jobs:
   deploy:
     strategy:
@@ -16,10 +24,12 @@ jobs:
         python-version:
           - "3.13"
     runs-on: ${{ matrix.platform }}
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
-      - name: Set up uv with caching enabled
+        with:
+          persist-credentials: false
+      - name: Set up uv
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
@@ -28,7 +38,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Generate documentation
-        shell: bash
         run: |
           make install-deps-docs
           make docs

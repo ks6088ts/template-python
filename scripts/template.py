@@ -1,3 +1,16 @@
+"""Vanilla Typer CLI skeleton.
+
+This script is intentionally kept as a stand-alone example. It is not
+shipped as part of the :mod:`template_python` package; copy and adapt it
+when you want to expose your own command-line interface.
+
+Run it with::
+
+    uv run python scripts/template.py hello --name World --verbose
+"""
+
+from __future__ import annotations
+
 import logging
 from typing import Annotated
 
@@ -16,9 +29,7 @@ app = typer.Typer(
 logger = get_logger(__name__)
 
 
-def set_verbose_logging(
-    verbose: bool,
-):
+def set_verbose_logging(verbose: bool) -> None:
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
         logger.setLevel(logging.DEBUG)
@@ -38,15 +49,18 @@ def hello(
         bool,
         typer.Option("--verbose", "-v", help="Enable verbose output"),
     ] = False,
-):
+) -> None:
     set_verbose_logging(verbose)
 
     hello_world(verbose=verbose)
-    logger.debug(f"This is a debug message with name: {name}")
-    logger.info(f"Settings from .env: {get_project_settings().model_dump_json(indent=2)}")
+    logger.debug("This is a debug message with name: %s", name)
+    logger.info(
+        "Settings from .env: %s",
+        get_project_settings().model_dump_json(indent=2),
+    )
 
 
 if __name__ == "__main__":
     if not load_dotenv(override=True, verbose=True):
-        logging.warning("No .env file found; using defaults")
+        logger.warning("No .env file found; using defaults")
     app()

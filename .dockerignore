@@ -1,51 +1,84 @@
-# Ignore node_modules and other dependency directories
-node_modules
-bower_components
-vendor
+# ---------------------------------------------------------------------------
+# Files and directories that should not enter the Docker build context.
+# Keeping this list tight reduces image size and accidental secret leaks.
+# ---------------------------------------------------------------------------
 
-# Ignore logs and temporary files
-*.log
-*.tmp
-*.swp
-
-# Ignore .env files and other environment files
-.env
-.env.*
-*.local
-
-# Ignore git-related files
+# VCS metadata
 .git
 .gitignore
+.gitattributes
 
-# Ignore Docker-related files and configs
-.dockerignore
-docker-compose.yml
+# Local environments and secrets
+.env
+.env.*
+!.env.template
+*.local
 
-# Ignore build and cache directories
+# Python build / cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.egg-info
 dist
 build
 .cache
-__pycache__
-
-# Ignore IDE and editor configurations
-.vscode
-.idea
-*.sublime-project
-*.sublime-workspace
-.DS_Store  # macOS-specific
-
-# Ignore test and coverage files
-coverage
-*.coverage
-*.test.js
-*.spec.js
-tests
-
-# Misc
-.github
-.venv
-*.pyc
-.devcontainer
-.pre-commit-config.yaml
+.eggs
+.tox
+.nox
+.coverage
+.coverage.*
+coverage.xml
+htmlcov
+*.cover
+.hypothesis
 .pytest_cache
 .ruff_cache
+.mypy_cache
+.pyre
+.pytype
+
+# Virtual environments
+.venv
+venv
+env
+
+# Jupyter
+.ipynb_checkpoints
+notebooks
+
+# Documentation build output
+site
+docs/_build
+
+# IDE / editor metadata
+.vscode
+.idea
+.devcontainer
+*.swp
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+
+# CI / project meta files (not needed at runtime)
+# Note: README.md and LICENSE are intentionally NOT excluded because
+# pyproject.toml references them (`readme`, `license-files`) and the
+# build backend reads them while `uv sync` installs the project.
+.github
+.pre-commit-config.yaml
+.dockerignore
+Dockerfile
+compose.yml
+docker-compose.yml
+Makefile
+mkdocs.yml
+SECURITY.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+CHANGELOG.md
+tests
+scripts
+
+# Logs and tmp
+*.log
+*.tmp

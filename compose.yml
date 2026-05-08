@@ -4,10 +4,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["python", "-m", "http.server", "8000"]
+    image: ks6088ts/template-python:local
+    command: ["python", "-m", "template_python.core"]
     env_file:
       - .env
     environment:
       PROJECT_NAME: hello
-    ports:
-      - "8000:8000"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: "no"

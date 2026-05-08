@@ -3,8 +3,22 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-toml
+      - id: check-json
+        # Skip files that use JSON-with-Comments (JSONC), which standard
+        # json.load cannot parse. These configs are validated by their
+        # respective tooling (VS Code / devcontainers) instead.
+        exclude: "^(\\.vscode/.*\\.json|\\.devcontainer/.*\\.json)$"
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
       - id: end-of-file-fixer
       - id: trailing-whitespace
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.0
     hooks:
@@ -13,4 +27,10 @@ repos:
         args: [--fix]
       - id: ruff-format
         types_or: [python, pyi]
-exclude: "generated/.*|artifacts/.*"
+
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
+exclude: "generated/.*|artifacts/.*|^uv\\.lock$"

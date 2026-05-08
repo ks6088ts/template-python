@@ -9,6 +9,16 @@ on:
   pull_request:
     branches:
       - "main"
+  workflow_dispatch:
+
+# Cancel in-progress runs for the same ref to save CI minutes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Default to a hardened, minimal token. Individual jobs widen as needed.
+permissions:
+  contents: read
 
 jobs:
   test:

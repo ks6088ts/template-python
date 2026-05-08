@@ -1,27 +1,32 @@
+"""Logging helpers used across the project."""
+
+from __future__ import annotations
+
 import logging
 
 from template_python.settings import get_project_settings
 
+_LOG_FORMAT = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+
 
 def get_logger(
     name: str = "default",
-    log_level: str | None = None,
+    log_level: str | int | None = None,
 ) -> logging.Logger:
-    """
-    Get a logger with the specified name.
+    """Return a configured logger.
 
-    If the logger already has handlers, it is returned as-is to avoid
-    adding duplicate handlers on repeated calls.
+    If the logger already has handlers, it is returned as-is to avoid adding
+    duplicate handlers on repeated calls.
 
     Args:
-        name (str): The name of the logger.
-        log_level (str | None): The logging level. Defaults to the project setting.
+        name: The name of the logger.
+        log_level: The logging level. Defaults to the project setting.
+
     Returns:
-        logging.Logger: Configured logger instance.
+        A configured :class:`logging.Logger` instance.
     """
     logger = logging.getLogger(name)
 
-    # Avoid adding duplicate handlers on repeated calls
     if logger.handlers:
         return logger
 
@@ -29,8 +34,7 @@ def get_logger(
         log_level = get_project_settings().project_log_level
 
     logger.setLevel(log_level)
-    formatter = logging.Formatter("%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)")
     handler = logging.StreamHandler()
-    handler.setFormatter(formatter)
+    handler.setFormatter(logging.Formatter(_LOG_FORMAT))
     logger.addHandler(handler)
     return logger
