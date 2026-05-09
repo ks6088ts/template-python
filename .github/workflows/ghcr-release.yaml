@@ -3,15 +3,15 @@ on:
   push:
     tags:
       - "v*"
+permissions:
+  packages: write
+  contents: read
 env:
   IMAGE_NAME: template-python
 jobs:
   ghcr:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      packages: write
-      contents: read
     steps:
       - uses: actions/checkout@v6
       - name: Set up Docker Buildx
