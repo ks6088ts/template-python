@@ -16,8 +16,16 @@ app = typer.Typer(
 logger = get_logger(__name__)
 
 
-def set_verbose_logging(
-    verbose: bool,
+@app.callback()
+def main(
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            "--verbose",
+            "-v",
+            help="Enable verbose output",
+        ),
+    ] = False,
 ):
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
@@ -34,14 +42,8 @@ def hello(
             help="Name of the person to greet",
         ),
     ] = "World",
-    verbose: Annotated[
-        bool,
-        typer.Option("--verbose", "-v", help="Enable verbose output"),
-    ] = False,
 ):
-    set_verbose_logging(verbose)
-
-    hello_world(verbose=verbose)
+    hello_world()
     logger.debug(f"This is a debug message with name: {name}")
     logger.info(f"Settings from .env: {get_project_settings().model_dump_json(indent=2)}")
 

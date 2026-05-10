@@ -21,43 +21,29 @@ def setup_session():
     logger.info("[TEARDOWN] Cleaning up session-wide resources")
 
 
-def test_hello_world_verbose(caplog):
+def test_hello_world_logs_message(caplog):
     """
-    Test the hello_world function with verbose output.
-    This test checks if the function logs the expected message.
+    Test that hello_world logs the expected message at INFO level.
     """
-    logger.info("[TEST] Running test_hello_world_verbose")
-    with caplog.at_level(logging.DEBUG, logger="template_python.core"):
-        hello_world(verbose=True)
+    logger.info("[TEST] Running test_hello_world_logs_message")
+    with caplog.at_level(logging.INFO, logger="template_python.core"):
+        hello_world()
     assert "Hello World" in caplog.text
 
 
-def test_hello_world_non_verbose(caplog):
-    """
-    Test the hello_world function without verbose output.
-    This test checks that the DEBUG-level message does not appear
-    when verbose is False.
-    """
-    logger.info("[TEST] Running test_hello_world_non_verbose")
-    with caplog.at_level(logging.INFO):
-        hello_world(verbose=False)
-    assert "Hello World" in caplog.text  # now logged at INFO level
-
-
 @pytest.mark.parametrize(
-    "verbose, log_level",
+    "log_level",
     [
-        (True, logging.DEBUG),
-        (False, logging.INFO),
+        logging.DEBUG,
+        logging.INFO,
     ],
 )
-def test_hello_world_parametrized(caplog, verbose, log_level):
+def test_hello_world_parametrized(caplog, log_level):
     """
     Parametrized test for the hello_world function.
-    Regardless of verbosity the message 'Hello World' should appear
-    when capturing at the appropriate level.
+    The message 'Hello World' should appear when capturing at INFO or lower.
     """
-    logger.info(f"[TEST] Running test_hello_world_parametrized with verbose={verbose}")
+    logger.info(f"[TEST] Running test_hello_world_parametrized with log_level={log_level}")
     with caplog.at_level(log_level, logger="template_python.core"):
-        hello_world(verbose=verbose)
+        hello_world()
     assert "Hello World" in caplog.text
