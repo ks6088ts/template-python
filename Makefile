@@ -14,39 +14,48 @@ info: ## show information
 
 .PHONY: install-deps-dev
 install-deps-dev: ## install dependencies for development
-	uv sync --all-groups
-	uv run pre-commit install
+	uv sync --locked --all-groups
+	uv run --locked prek install -f
 	@which actionlint || echo "install actionlint https://github.com/rhysd/actionlint"
+
+.PHONY: install-deps-ci
+install-deps-ci: ## install dependencies for CI checks
+	uv sync --locked --group dev
 
 .PHONY: install-deps
 install-deps: ## install dependencies for production
-	uv sync --no-dev
+	uv sync --locked --no-dev
 
 .PHONY: format-check
 format-check: ## format check
-	uv run ruff format --check --verbose
+	uv run --locked ruff format --check --verbose
 
 .PHONY: format
 format: ## format code
-	uv run ruff format --verbose
+	uv run --locked ruff format --verbose
 
 .PHONY: fix
 fix: format ## apply auto-fixes
-	uv run ruff check --fix
+	uv run --locked ruff check --fix
 
 .PHONY: lint
 lint: ## lint
-	uv run ruff check .
-	uv run ty check
-	uv run pyrefly check
+	uv run --locked ruff check .
+	uv run --locked ty check
+	uv run --locked pyrefly check
 	actionlint
+	uv run --locked zizmor --offline --strict-collection --min-severity high .
 
 .PHONY: test
 test: ## run tests
-	uv run pytest --capture=no -vv
+	uv run --locked pytest --capture=no -vv
+
+.PHONY: hooks-check
+hooks-check: ## check all configured hooks
+	uv run --locked prek run --all-files
 
 .PHONY: ci-test
-ci-test: install-deps-dev format-check lint test ## run CI tests
+ci-test: install-deps-ci format-check lint test ## run CI tests
 
 .PHONY: update
 update: ## update packages
@@ -54,7 +63,7 @@ update: ## update packages
 
 .PHONY: jupyterlab
 jupyterlab: ## run Jupyter Lab
-	uv run jupyter lab
+	uv run --locked --group notebook jupyter lab
 
 # ---
 # Docker
@@ -64,8 +73,9 @@ DOCKER_IMAGE_NAME ?= template-python
 DOCKER_COMMAND ?=
 
 # Tools
-TOOLS_DIR ?= /usr/local/bin
-TRIVY_VERSION ?= 0.69.3
+HADOLINT_VERSION ?= v2.15.1
+TRIVY_VERSION ?= 0.74.0
+TRIVY_CACHE_VOLUME ?= template-python-trivy-cache
 
 .PHONY: docker-build
 docker-build: ## build Docker image
@@ -81,13 +91,14 @@ docker-run: ## run Docker container
 
 .PHONY: docker-lint
 docker-lint: ## lint Dockerfile
-	docker run --rm -i hadolint/hadolint < Dockerfile
+	docker run --rm -i hadolint/hadolint:$(HADOLINT_VERSION) < Dockerfile
 
 .PHONY: docker-scan
 docker-scan: ## scan Docker image
-	@# https://aquasecurity.github.io/trivy/v0.18.3/installation/#install-script
-	@which trivy || curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b $(TOOLS_DIR) v$(TRIVY_VERSION)
-	trivy image $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME):$(GIT_TAG)
+	docker run --rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v $(TRIVY_CACHE_VOLUME):/root/.cache/trivy \
+		aquasec/trivy:$(TRIVY_VERSION) image $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME):$(GIT_TAG)
 
 .PHONY: ci-test-docker
 ci-test-docker: docker-lint docker-build docker-scan docker-run ## run CI test for Docker
@@ -98,15 +109,15 @@ ci-test-docker: docker-lint docker-build docker-scan docker-run ## run CI test f
 
 .PHONY: install-deps-docs
 install-deps-docs: ## install dependencies for documentation
-	uv sync --group docs
+	uv sync --locked --no-dev --group docs
 
 .PHONY: docs
 docs: ## build documentation
-	uv run mkdocs build
+	uv run --locked --no-dev --group docs mkdocs build
 
 .PHONY: docs-serve
 docs-serve: ## serve documentation
-	uv run mkdocs serve
+	uv run --locked --no-dev --group docs mkdocs serve
 
 .PHONY: ci-test-docs
 ci-test-docs: install-deps-docs docs ## run CI test for documentation

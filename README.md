@@ -10,9 +10,11 @@ This is a template repository for Python
 
 ## Prerequisites
 
-- [Python 3.10+](https://www.python.org/downloads/)
-- [uv](https://docs.astral.sh/uv/getting-started/installation/)
+- [Python 3.10+](https://www.python.org/downloads/) (CI tests 3.10 through 3.14)
+- [uv 0.12.19](https://docs.astral.sh/uv/getting-started/installation/)
 - [GNU Make](https://www.gnu.org/software/make/)
+- [actionlint](https://github.com/rhysd/actionlint) for local lint/CI checks (CI uses v1.7.12)
+- [Docker](https://docs.docker.com/get-docker/) for the Docker targets
 
 ## Development instructions
 
@@ -27,12 +29,29 @@ make
 # install dependencies for development
 make install-deps-dev
 
+# check all configured hooks
+make hooks-check
+
 # run tests
 make test
 
 # run CI tests
 make ci-test
+
+# build the English and Japanese documentation
+make ci-test-docs
+
+# launch JupyterLab
+make jupyterlab
 ```
+
+`make install-deps-dev` installs all development groups and installs the
+[prek](https://prek.j178.dev/) Git hook, replacing a previously installed
+pre-commit hook. CI uses a smaller dependency set without JupyterLab; the
+notebook group remains available through `make jupyterlab`.
+`make lint` also runs an offline [zizmor](https://zizmor.sh/) check that blocks
+high-severity GitHub Actions configuration findings. Run
+`uv run --locked zizmor --offline .` to review lower-severity findings as well.
 
 ### Docker development
 
@@ -46,6 +65,14 @@ make docker-run
 # run CI tests in docker container
 make ci-test-docker
 ```
+
+The Docker CI target lints, builds, scans, and runs the image. The Trivy scan
+currently reports vulnerabilities without failing the build; review its
+findings before enabling a blocking severity threshold.
+
+The documentation uses Material for MkDocs with `mkdocs-static-i18n` to publish
+both languages. A switch to Zensical requires equivalent multilingual output;
+unsupported MkDocs plugins are not run by Zensical.
 
 ## Deployment instructions
 

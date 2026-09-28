@@ -6,7 +6,7 @@ on:
   #   branches:
   #     - main
 permissions:
-  contents: write
+  contents: read
 jobs:
   deploy:
     strategy:
@@ -18,13 +18,17 @@ jobs:
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Set up uv with caching enabled
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
+          version: "0.12.19"
+          python-version: ${{ matrix.python-version }}
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Generate documentation
@@ -33,11 +37,10 @@ jobs:
           make install-deps-docs
           make docs
       - name: Deploy
-        uses: Azure/static-web-apps-deploy@v1
+        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9 # v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "./site"
+          output_location: ""
           skip_app_build: true
-          skip_api_build: true
