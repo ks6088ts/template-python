@@ -1,14 +1,12 @@
 FROM python:3.13-slim-bookworm AS requirements-stage
 
-WORKDIR /tmp
+WORKDIR /build
 
-RUN pip install --no-cache-dir uv==0.7.12
+COPY --from=astral/uv:0.12.19 /uv /usr/local/bin/uv
 
-COPY ./pyproject.toml ./uv.lock /tmp/
+COPY ./pyproject.toml ./uv.lock ./
 
-# Delete `-e .` line from requirements.txt
-RUN uv export --format requirements-txt --no-dev --no-hashes --output-file requirements.txt && \
-    sed -i '/^-e .*/d' requirements.txt
+RUN uv export --locked --format requirements-txt --no-dev --no-hashes --no-emit-project --output-file requirements.txt
 
 FROM python:3.13-slim-bookworm
 
@@ -18,7 +16,7 @@ ARG GIT_TAG="x.x.x"
 WORKDIR /app
 
 # Copy requirements first for better cache efficiency
-COPY --from=requirements-stage /tmp/requirements.txt /app/requirements.txt
+COPY --from=requirements-stage /build/requirements.txt /app/requirements.txt
 
 # Install dependencies in a separate layer for caching
 RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
