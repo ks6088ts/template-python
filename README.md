@@ -8,6 +8,9 @@
 
 This is a template repository for Python
 
+See the [architecture and engineering guide](docs/architecture/README.md) for
+the project map, design principles, dependency rules, and change checklist.
+
 ## Prerequisites
 
 - [Python 3.10+](https://www.python.org/downloads/) (CI tests 3.10 through 3.14)

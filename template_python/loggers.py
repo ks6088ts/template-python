@@ -21,14 +21,15 @@ def get_logger(
     """
     logger = logging.getLogger(name)
 
-    # Avoid adding duplicate handlers on repeated calls
-    if logger.handlers:
-        return logger
-
     if log_level is None:
         log_level = get_project_settings().project_log_level
 
     logger.setLevel(log_level)
+    logger.propagate = False
+
+    if logger.handlers:
+        return logger
+
     formatter = logging.Formatter("%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)")
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)

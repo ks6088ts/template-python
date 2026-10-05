@@ -2,6 +2,9 @@
 
 This repository is a template repository for Python projects.
 
+See the [architecture and engineering guide](architecture/README.md) for the
+project map, design principles, quality gates, and contributor checklist.
+
 ## Dependency direction checks
 
 Install the development dependencies and run the architecture check:
