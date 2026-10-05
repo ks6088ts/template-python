@@ -22,6 +22,7 @@ test = [
 dev = [
     { include-group = "test" },
     "coverage>=7.8.0",
+    "mypy>=2.4.0",
     "prek>=0.5.4,<0.6",
     "pyrefly>=0.44.1",
     "ruff>=0.11.7",
@@ -55,6 +56,13 @@ log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 
 [tool.coverage.report]
 show_missing = true
+
+[tool.mypy]
+files = ["template_python", "scripts", "tests"]
+python_version = "3.10"
+strict = true
+show_error_codes = true
+plugins = ["pydantic.mypy"]
 
 [tool.ty]
 environment = { python-version = "3.10" }

@@ -5,7 +5,7 @@ from template_python.loggers import get_logger
 logger = get_logger(__name__)
 
 
-def hello_world():
+def hello_world() -> None:
     """Log a greeting message"""
     logger.critical("Critical: Hello World")
     logger.error("Error: Hello World")

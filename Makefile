@@ -38,8 +38,12 @@ format: ## format code
 fix: format ## apply auto-fixes
 	uv run --locked ruff check --fix
 
+.PHONY: type-check
+type-check: ## check types with mypy
+	uv run --locked mypy --config-file pyproject.toml
+
 .PHONY: lint
-lint: ## lint
+lint: type-check ## lint
 	uv run --locked ruff check .
 	uv run --locked ty check
 	uv run --locked pyrefly check

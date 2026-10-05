@@ -1,11 +1,13 @@
 import logging
 
+import pytest
+
 from template_python.loggers import get_logger
 
 logger = get_logger(__name__)
 
 
-def test_get_logger(caplog):
+def test_get_logger(caplog: pytest.LogCaptureFixture) -> None:
     """
     Test the get_logger function to ensure it returns a logger instance
     and prints a debug message correctly.

@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Iterator
 
 import pytest
 
@@ -9,7 +10,7 @@ logger = get_logger(__name__)
 
 
 @pytest.fixture(scope="session")
-def setup_session():
+def setup_session() -> Iterator[dict[str, str]]:
     """
     Session-wide setup fixture that initializes resources
     needed for the tests. This fixture runs once per test session.
@@ -21,7 +22,7 @@ def setup_session():
     logger.info("[TEARDOWN] Cleaning up session-wide resources")
 
 
-def test_hello_world_logs_message(caplog):
+def test_hello_world_logs_message(caplog: pytest.LogCaptureFixture) -> None:
     """
     Test that hello_world logs the expected message at INFO level.
     """
@@ -38,7 +39,7 @@ def test_hello_world_logs_message(caplog):
         logging.INFO,
     ],
 )
-def test_hello_world_parametrized(caplog, log_level):
+def test_hello_world_parametrized(caplog: pytest.LogCaptureFixture, log_level: int) -> None:
     """
     Parametrized test for the hello_world function.
     The message 'Hello World' should appear when capturing at INFO or lower.

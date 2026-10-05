@@ -1,5 +1,6 @@
 from logging import DEBUG
 
+import pytest
 from dotenv import load_dotenv
 
 from template_python.loggers import get_logger
@@ -8,7 +9,7 @@ from template_python.settings import ProjectSettings
 logger = get_logger(__name__)
 
 
-def test_settings(caplog):
+def test_settings(caplog: pytest.LogCaptureFixture) -> None:
     """
     Test that ProjectSettings loads values correctly from the .env.template file.
     """
