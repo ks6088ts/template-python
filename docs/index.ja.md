@@ -15,20 +15,19 @@ make import-lint
 layers 契約を使い、次の依存方向を検証します。
 
 ```text
-template_python.core -> template_python.loggers -> template_python.settings
+scripts (applications) -> template_python (library)
 ```
 
-上位層から下位層への依存は許可します。途中の層を飛ばす依存
-（`core` から `settings` への直接参照）も許可します。
-下位層から上位層への依存は、直接・他のモジュールを経由する間接参照の両方を禁止します。
-`settings.project` などの子モジュールや `if TYPE_CHECKING:` 内の import も対象です。
+`scripts/` 以下をアプリケーション層、`template_python` をライブラリ層として扱います。
+アプリケーションからライブラリへの依存は許可します。
+ライブラリ内のどのモジュールからも、`scripts` とその子モジュールへの
+直接・間接の依存は禁止します。この境界は、どちらのディレクトリに新しく追加した
+モジュールにも適用されます。
+
+`if TYPE_CHECKING:` 内の import も対象です。
+ライブラリ内部のモジュール間には依存方向の制約を設けません。
 
 `make lint` と `make ci-test` にもこのチェックが含まれ、違反すると既存の
-Python 3.13 の CI 品質ゲートが失敗します。契約の対象は `template_python` 内で、
-scripts・tests・外部ライブラリへの依存には追加の制約を設けません。
+Python 3.13 の CI 品質ゲートが失敗します。契約の対象は `scripts` と
+`template_python` の両方で、tests・外部ライブラリへの依存には追加の制約を設けません。
 Git hook とデプロイワークフローは変更しません。
-
-契約は exhaustive ではないため、新しいトップレベルモジュールを追加しても
-層の指定は必須ではありません。ただし、そのモジュールを経由する既存層間の逆依存は
-引き続き検出します。新しい層にも制約を設ける場合は、`pyproject.toml` の
-`tool.importlinter.contracts` を上位から下位の順序で更新してください。

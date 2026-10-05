@@ -15,20 +15,18 @@ make import-lint
 in `pyproject.toml` to enforce the following dependency direction:
 
 ```text
-template_python.core -> template_python.loggers -> template_python.settings
+scripts (applications) -> template_python (library)
 ```
 
-Higher layers may import lower layers, including skipping a layer
-(`core` may import `settings` directly). Lower layers must not import higher
-layers, directly or indirectly through other modules. Child modules such as
-`settings.project` and imports under `if TYPE_CHECKING:` are also checked.
+Modules under `scripts/` are applications that may import the
+`template_python` library. No module in `template_python` may import `scripts`
+or its child modules, directly or indirectly. This boundary also applies to
+new modules added under either directory.
+
+Imports under `if TYPE_CHECKING:` are also checked. There are no dependency
+direction constraints between modules within the library.
 
 `make lint` and `make ci-test` include this check, and violations fail the
-existing Python 3.13 CI quality gate. The contract covers `template_python`;
-scripts, tests, and external-library dependencies have no additional constraints.
-Git hooks and deployment workflows are unchanged.
-
-The contract is not exhaustive: new top-level modules do not have to be assigned
-to a layer, but reverse dependencies between the existing layers through those
-modules are still checked. To constrain a new layer, update
-`tool.importlinter.contracts` in `pyproject.toml` in highest-to-lowest order.
+existing Python 3.13 CI quality gate. The contract covers both `scripts` and
+`template_python`; tests and external-library dependencies have no additional
+constraints. Git hooks and deployment workflows are unchanged.

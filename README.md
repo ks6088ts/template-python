@@ -72,23 +72,21 @@ high-severity GitHub Actions configuration findings. Run
 using the layers contract in `pyproject.toml`:
 
 ```text
-template_python.core -> template_python.loggers -> template_python.settings
+scripts (applications) -> template_python (library)
 ```
 
-Higher layers may import lower layers, including skipping a layer
-(`core` may import `settings` directly). Reverse dependencies are forbidden,
-both directly and indirectly through other modules. The rule also applies to
-child modules such as `settings.project` and imports under `if TYPE_CHECKING:`.
+Modules under `scripts/` are applications that may import the
+`template_python` library. No module in `template_python` may import `scripts`
+or its child modules, directly or indirectly. This boundary also applies to
+new modules added under either directory.
+
+Imports under `if TYPE_CHECKING:` are also checked. There are no dependency
+direction constraints between modules within the library.
 
 The check is included in `make lint` and `make ci-test`, so dependency violations
-fail the existing Python 3.13 CI quality gate. It analyzes `template_python`
-only; scripts, tests, and external-library dependencies have no additional
+fail the existing Python 3.13 CI quality gate. It analyzes both `scripts` and
+`template_python`; tests and external-library dependencies have no additional
 constraints. Git hooks and deployment workflows are unchanged.
-
-The contract is not exhaustive: adding a top-level module does not require
-assigning it to a layer. Reverse dependencies between the existing layers
-through that module are still checked. To constrain a new layer, update
-`tool.importlinter.contracts` in `pyproject.toml` in highest-to-lowest order.
 
 ### Docker development
 

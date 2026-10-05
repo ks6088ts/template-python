@@ -59,17 +59,16 @@ log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 show_missing = true
 
 [tool.importlinter]
-root_package = "template_python"
+root_packages = ["scripts", "template_python"]
 exclude_type_checking_imports = false
 
 [[tool.importlinter.contracts]]
-id = "package-layers"
-name = "Core -> loggers -> settings"
+id = "application-library-layers"
+name = "Applications -> library"
 type = "layers"
 layers = [
-    "template_python.core",
-    "template_python.loggers",
-    "template_python.settings",
+    "scripts",
+    "template_python",
 ]
 
 [tool.mypy]
