@@ -42,8 +42,12 @@ fix: format ## apply auto-fixes
 type-check: ## check types with mypy
 	uv run --locked mypy --config-file pyproject.toml
 
+.PHONY: import-lint
+import-lint: ## check dependency directions with import-linter
+	uv run --locked lint-imports --config pyproject.toml
+
 .PHONY: lint
-lint: type-check ## lint
+lint: type-check import-lint ## lint
 	uv run --locked ruff check .
 	uv run --locked ty check
 	uv run --locked pyrefly check

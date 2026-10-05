@@ -35,6 +35,9 @@ make hooks-check
 # check types with mypy
 make type-check
 
+# check dependency directions with import-linter
+make import-lint
+
 # run tests
 make test
 
@@ -62,6 +65,30 @@ are unchanged, and this does not add a pre-deployment gate.
 `make lint` also runs an offline [zizmor](https://zizmor.sh/) check that blocks
 high-severity GitHub Actions configuration findings. Run
 `uv run --locked zizmor --offline .` to review lower-severity findings as well.
+
+### Dependency direction checks
+
+`make import-lint` runs [import-linter](https://import-linter.readthedocs.io/)
+using the layers contract in `pyproject.toml`:
+
+```text
+template_python.core -> template_python.loggers -> template_python.settings
+```
+
+Higher layers may import lower layers, including skipping a layer
+(`core` may import `settings` directly). Reverse dependencies are forbidden,
+both directly and indirectly through other modules. The rule also applies to
+child modules such as `settings.project` and imports under `if TYPE_CHECKING:`.
+
+The check is included in `make lint` and `make ci-test`, so dependency violations
+fail the existing Python 3.13 CI quality gate. It analyzes `template_python`
+only; scripts, tests, and external-library dependencies have no additional
+constraints. Git hooks and deployment workflows are unchanged.
+
+The contract is not exhaustive: adding a top-level module does not require
+assigning it to a layer. Reverse dependencies between the existing layers
+through that module are still checked. To constrain a new layer, update
+`tool.importlinter.contracts` in `pyproject.toml` in highest-to-lowest order.
 
 ### Docker development
 

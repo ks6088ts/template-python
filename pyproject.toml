@@ -22,6 +22,7 @@ test = [
 dev = [
     { include-group = "test" },
     "coverage>=7.8.0",
+    "import-linter>=2.15,<3",
     "mypy>=2.4.0",
     "prek>=0.5.4,<0.6",
     "pyrefly>=0.44.1",
@@ -56,6 +57,20 @@ log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 
 [tool.coverage.report]
 show_missing = true
+
+[tool.importlinter]
+root_package = "template_python"
+exclude_type_checking_imports = false
+
+[[tool.importlinter.contracts]]
+id = "package-layers"
+name = "Core -> loggers -> settings"
+type = "layers"
+layers = [
+    "template_python.core",
+    "template_python.loggers",
+    "template_python.settings",
+]
 
 [tool.mypy]
 files = ["template_python", "scripts", "tests"]
