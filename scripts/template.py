@@ -26,7 +26,7 @@ def main(
             help="Enable verbose output",
         ),
     ] = False,
-):
+) -> None:
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
         logger.setLevel(logging.DEBUG)
@@ -42,7 +42,7 @@ def hello(
             help="Name of the person to greet",
         ),
     ] = "World",
-):
+) -> None:
     hello_world()
     logger.debug(f"This is a debug message with name: {name}")
     logger.info(f"Settings from .env: {get_project_settings().model_dump_json(indent=2)}")

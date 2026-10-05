@@ -8,6 +8,9 @@
 
 This is a template repository for Python
 
+See the [architecture and engineering guide](docs/architecture/README.md) for
+the project map, design principles, dependency rules, and change checklist.
+
 ## Prerequisites
 
 - [Python 3.10+](https://www.python.org/downloads/) (CI tests 3.10 through 3.14)
@@ -32,6 +35,12 @@ make install-deps-dev
 # check all configured hooks
 make hooks-check
 
+# check types with mypy
+make type-check
+
+# check dependency directions with import-linter
+make import-lint
+
 # run tests
 make test
 
@@ -49,9 +58,38 @@ make jupyterlab
 [prek](https://prek.j178.dev/) Git hook, replacing a previously installed
 pre-commit hook. CI uses a smaller dependency set without JupyterLab; the
 notebook group remains available through `make jupyterlab`.
+`make type-check` runs mypy in strict mode on `template_python/`, `scripts/`,
+and `tests/`, using Python 3.10 as the target version and the Pydantic plugin.
+Notebooks are not included in this mypy check. `make lint` includes this target
+alongside the existing ty and pyrefly checks, so `make ci-test` also checks types
+and fails on type errors. CI runs these quality checks on Python 3.13; the other
+Python versions run compatibility tests only. Git hooks and deployment workflows
+are unchanged, and this does not add a pre-deployment gate.
 `make lint` also runs an offline [zizmor](https://zizmor.sh/) check that blocks
 high-severity GitHub Actions configuration findings. Run
 `uv run --locked zizmor --offline .` to review lower-severity findings as well.
+
+### Dependency direction checks
+
+`make import-lint` runs [import-linter](https://import-linter.readthedocs.io/)
+using the layers contract in `pyproject.toml`:
+
+```text
+scripts (applications) -> template_python (library)
+```
+
+Modules under `scripts/` are applications that may import the
+`template_python` library. No module in `template_python` may import `scripts`
+or its child modules, directly or indirectly. This boundary also applies to
+new modules added under either directory.
+
+Imports under `if TYPE_CHECKING:` are also checked. There are no dependency
+direction constraints between modules within the library.
+
+The check is included in `make lint` and `make ci-test`, so dependency violations
+fail the existing Python 3.13 CI quality gate. It analyzes both `scripts` and
+`template_python`; tests and external-library dependencies have no additional
+constraints. Git hooks and deployment workflows are unchanged.
 
 ### Docker development
 
