@@ -5,9 +5,10 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "ms-python.python",
                 "charliermarsh.ruff",
-                "GitHub.copilot-chat"
+                "GitHub.copilot-chat",
+                "ms-python.mypy-type-checker",
+                "ms-python.python"
             ]
         }
     },

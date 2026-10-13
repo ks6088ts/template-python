@@ -1,129 +1,165 @@
-# アーキテクチャ・開発ガイド
+# アーキテクチャとエンジニアリングガイド
 
-## プロジェクト概要
+コードの置き場所、依存関係の追加、配布アセットの変更を判断するときに使います。
+実行手順とトラブル対応は[開発ガイド](../development.ja.md)を参照してください。
 
-`template-python` は Python 3.10 以上を対象とする再利用可能なテンプレートです。
-小さなライブラリと CLI の例、環境変数ベースの設定、構造化ログ、テスト、
-ドキュメント、コンテナ、固定された CI/CD ワークフローを提供します。
+## 既定の設計
 
-ローカルと CI で同じコマンドを使い、少数の明示的なルールを自動検証することを
-基本方針とします。
-
-| 領域 | Source of truth |
-| --- | --- |
-| パッケージ情報・ツール設定 | `pyproject.toml` |
-| 解決済み依存関係 | `uv.lock` |
-| 開発・CI コマンド | `Makefile` |
-| Python 互換性・品質ゲート | `.github/workflows/test.yaml` |
-| ドキュメントの導線・多言語化 | `mkdocs.yml` |
-
-## ディレクトリの責務
-
-| パス | 責務 |
-| --- | --- |
-| `template_python/` | 再利用可能なライブラリ。アプリケーションへ依存しない |
-| `template_python/settings/` | 型付きの環境変数・`.env` 設定 |
-| `scripts/` | ライブラリを組み立てるアプリケーション入口 |
-| `tests/` | 単体テスト・振る舞いのテスト |
-| `docs/` | MkDocs の英語・日本語ソース |
-| `notebooks/` | 任意利用の対話的な例 |
-| `.github/workflows/` | テスト、文書、コンテナ、リリースの自動化 |
-
-最初に `pyproject.toml` と `Makefile` を確認し、続けて
-`scripts/template.py`、`template_python/core.py`、
-`template_python/settings/project.py`、対応するテストの順に読むと全体を把握できます。
-
-## 依存方向
-
-意図する依存方向は次のとおりです。
+1つのインストール可能なパッケージと、薄いアプリケーション境界で構成します。
 
 ```text
-scripts (applications) -> template_python (library)
+CLI（Typer、設定、ログ） -> コアロジック（値と具体的な例外）
 ```
 
-アプリケーションはライブラリを import して組み立てられます。ライブラリから
-`scripts` への直接・間接の依存は禁止し、`TYPE_CHECKING` 内の import も対象です。
-`pyproject.toml` の import-linter 契約が、既存および新規モジュールにこの境界を
-強制します。安定した内部レイヤーが必要になるまでは、ライブラリ内部の依存方向を
-過剰に制約しません。
+`src/template_python/core.py` は、環境変数、ログ、CLI の副作用を持たない決定的な
+処理を担当します。`cli.py` が設定を読み、ログを構成してコアを呼び出します。
+`__init__.py` は CLI を import せず再利用可能な処理を公開し、
+`__main__.py` は起動だけを担当します。
 
-## 実行時モデル
+この分離により、ライブラリの利用者は関数を呼ぶだけなら、Typer、環境変数の
+読み込み、プロセス全体のログ設定を理解する必要がありません。
 
-- `scripts/template.py` は Typer CLI の例であり、アプリケーションの composition
-  root です。
-- `template_python/core.py` は CLI に依存しないライブラリの振る舞いを持ちます。
-- `ProjectSettings` は環境変数と `.env` から `PROJECT_*` を読み取ります。最初の
-  取得後に設定を意図的に変更するテストや長時間プロセスでは
-  `get_project_settings.cache_clear()` を呼びます。
-- `get_logger()` はプロジェクトの名前付き logger ごとに handler を 1 つだけ持ち、
-  呼び出しごとに現在の指定レベルを反映し、root logger 経由の二重出力を防ぎます。
-- Docker image は既定で `python -m template_python.core` を実行します。Compose は
-  コンテナ例として単純な HTTP server に command を上書きします。
+<a id="where-to-change-code"></a>
 
-## 設計原則
+## 変更箇所の早見表
 
-1. **依存方向を明示する。** アプリケーションがライブラリを組み立て、再利用可能な
-   コードから entry point へ逆依存させません。
-2. **ローカルと CI で同じコマンドを使う。** 検査は Make target に追加し、CI に
-   shell 処理を重複させず、その target を呼び出します。
-3. **設定を境界に置く。** 外部設定は型付き settings で読み、可能な限り値として
-   core の振る舞いへ渡します。
-4. **繰り返し呼び出しても安全にする。** logger や settings の factory は handler
-   などの process-global state を意図せず蓄積させません。
-5. **決定的なツール実行を優先する。** `uv.lock` を commit し、`uv --locked` を使い、
-   third-party GitHub Actions は commit SHA で固定します。
-6. **観測可能な契約をテストする。** 実装詳細だけでなく、振る舞い、依存規則、
-   サポートする Python version を検証します。
-7. **テンプレートを置換しやすく保つ。** 生成先で必要になるまでは、固有の
-   infrastructure や domain abstraction を持ち込みません。
-8. **失敗を明示する。** 品質、型、アーキテクチャ、文書、security の検査は、
-   成功に見える fallback を返さず失敗として表面化させます。
+| 変更したいこと | 主な変更先 | テストする契約 |
+| --- | --- | --- |
+| 再利用可能な処理 | `src/template_python/core.py` または目的の明確な新モジュール | `tests/test_core.py` または対応する新テストで、値・正規化・具体的な例外を確認 |
+| コマンド・オプション・利用者向けエラー | `src/template_python/cli.py` | `tests/test_cli.py` で stdout・stderr・終了コードを確認 |
+| 環境変数による設定 | `src/template_python/settings.py` と `.env.template` | `tests/test_settings.py` で既定値・許容値・拒否を確認 |
+| ログ設定 | `src/template_python/logging.py` | `tests/test_logging.py` でレベル検証・出力を確認 |
+| ライブラリの公開 API | `src/template_python/__init__.py` | CLI を初期化せず公開 API を import・実行できることを確認 |
+| ビルド・依存関係 | `pyproject.toml` と `uv.lock` | `make package-check` でインストール済み wheel の動作を確認 |
 
-## 開発フロー
+## 認知負荷を小さく保つ
 
-```shell
-make install-deps-dev
-make fix
-make ci-test
-make ci-test-docs
-```
+既定の方針には理由があります。将来必要かもしれないものではなく、具体的な要求に
+応じて変更します。
 
-`make ci-test` は CI 用依存を導入し、format、mypy strict、import-linter、Ruff、ty、
-Pyrefly、actionlint、zizmor、pytest を実行します。CI では Python 3.13 が全品質
-ゲートを実行し、Python 3.10 から 3.14 が互換性テストを実行します。
-`make hooks-check` は設定済みの prek hook を検証します。
+| 判断 | まず選ぶもの | 見直す条件 |
+| --- | --- | --- |
+| 新しい処理の置き場所 | 目的の明確なモジュールの名前付き関数 | 外部 I/O の具体的な要求によりアプリケーション側の adapter が必要 |
+| 共通化するか | 責務が分かる名前で局所的に実装 | 複数の実際の利用箇所で同じ安定した振る舞いが必要 |
+| class・framework を追加するか | 関数と明示的な引数 | 状態や lifecycle の所有者が必要で、単純な組み合わせでは不足 |
+| 依存関係・ツールを追加するか | 標準ライブラリと既存ツール | 実行時・保守時のコストに見合う、測定可能な不足がある |
+| 任意アセットを使うか | 未使用のままにするか削除 | 実際の配布・開発要件で必要 |
 
-Docker daemon を利用できる場合は `make docker-build`、`make docker-run`、
-`make ci-test-docker` を使います。Trivy は現在、検出内容を報告しますが、severity
-による失敗条件は設定していません。
+- `utils`・`common` の寄せ集め、基底クラス階層、サービスロケータ、
+  将来を想像した DI framework は避けます。
+- 入出力と責務を表す名前を使います。小さな処理を理解するために、何層ものコードを
+  追う必要がない構造にします。
+- 値を返すか、具体的な例外を送出します。失敗を成功に見える既定値へ置き換えたり、
+  広く握りつぶしたり、秘密情報をログへ出したりしません。
+- 手順の正本を1つにします。複数の文書や Workflow へコマンドをコピーせず、
+  参照・再利用します。
 
-## デリバリーモデル
+自明ではない判断は、問題、最も単純な代替案、選んだトレードオフ、検証方法を
+PR の説明に残します。別の設計文書は、その変更後も理由を参照する必要があるとき
+だけ作ります。
 
-- push と pull request で Python 互換性・品質 workflow を実行します。
-- `main` への push で MkDocs site を公開します。
-- `v*` tag で Docker Hub と GitHub Container Registry に multi-platform image を
-  公開します。
-- Azure Static Web Apps は push trigger を明示的に有効化しない限り手動実行です。
-- Dependabot は uv、GitHub Actions、pre-commit、Docker の依存を毎週確認します。
+## 情報の正本
 
-release workflow は配送手段であり、test workflow の代替ではありません。変更時は
-最小権限と不変な action pin を維持します。
+| 対象 | 正本 |
+| --- | --- |
+| メタデータ、依存関係、ツール設定 | `pyproject.toml` |
+| 解決済み依存バージョン | `uv.lock` |
+| ローカルと CI のコマンド | `Makefile` |
+| 最低 Python・テスト対象バージョン | `pyproject.toml`・`.github/workflows/test.yaml` |
+| 設定の schema・設定例 | `src/template_python/settings.py`・`.env.template` |
+| コンテナ動作 | `Dockerfile` と `compose.yml` |
+| ドキュメント構成 | `mkdocs.yml` |
 
-## 変更時のチェックリスト
+宣言と、その宣言から生成するものは一緒に更新します。依存関係は
+`pyproject.toml` で変更し、`uv lock` で lock を再生成します。
+CI は同じ検証を独自に実装せず、Make target を呼びます。
 
-1. 再利用可能な振る舞いは `template_python/`、組み立ては `scripts/` に置く。
-2. 観測可能な振る舞いに対して焦点を絞ったテストを追加・更新する。
-3. 依存変更では `pyproject.toml` と再生成した `uv.lock` を同時に更新する。
-4. 再利用する検査は `Makefile` に追加してから、その target を CI に接続する。
-5. 利用者向けの振る舞いや開発規約を変えたら英語・日本語文書を更新する。
-6. `make ci-test` と `make ci-test-docs` を実行し、コンテナ変更では Docker 検査も
-   実行する。
+## ランタイムのルール
 
-## 既知の制約
+- パッケージの import 時にログ設定や環境変数読み込みを行いません。
+- コアは Typer や設定に依存せず、CLI が値と例外を表示・終了コードへ変換します。
+- `ProjectSettings` が `PROJECT_*` と任意の `.env` を一元管理します。
+  別の dotenv loader を追加しません。
+- root logger の設定は CLI callback で一度だけ行い、ライブラリは名前付き
+  logger を取得するだけにします。
+- CLI は `[project.scripts]` で公開し、`python -m template_python` も維持します。
 
-- これは本番 service ではなく template です。CLI、notebook、HTTP server、
-  container command は置換・拡張するための例です。
-- application/library 境界以外に、ライブラリ内部の layer 契約はありません。
-- ドキュメントは MkDocs plugin に依存するため、文書 engine の移行時には多言語出力を
-  維持する必要があります。
-- コンテナの脆弱性検査は、明示的な blocking policy を採用するまでは情報提供です。
+## 品質ゲート
+
+[変更内容に応じた検証](../development.ja.md#checks-by-change-type)を選びます。
+Python の品質ゲートは、整形、型、Lint、Workflow のルール、全テストを確認し、
+branch coverage **95% 以上**を要求します。wheel と sdist をビルドした後、
+wheel の CLI とモジュール起動を隔離環境で確認します。
+sdist のインストール試験は行いません。
+
+内部構造ではなく、失敗時を含む観測可能な契約をテストします。互換性を壊す必要が
+明示されていない限り、stdout、stderr、終了コード、import 時の動作を保ちます。
+
+## 配布
+
+- Pull Request と対象ブランチで Python とコンテナを検証します。
+- `main` から GitHub Pages へ英日ドキュメントを公開します。
+- `v*` tag から Docker Hub と GHCR へ multi-platform image を公開します。
+- GHCR release には push 済み digest に対応する provenance を付与します。
+- Azure Static Web Apps は手動デプロイを維持します。
+
+Release Workflow は、tag が `v` と `pyproject.toml` の version を連結した値に
+一致することを確認してから公開します。Docker Hub には
+`DOCKERHUB_USERNAME` と `DOCKERHUB_TOKEN` の secret が必要です。
+GHCR は Workflow の GitHub token を使います。手動のサイト公開には
+`AZURE_STATIC_WEB_APPS_API_TOKEN` が必要です。これらの認証情報はローカル開発に
+不要です。PyPI への公開は設定されていません。
+
+外部 Action は commit SHA で固定します。Workflow は明示的な最小権限、
+checkout credential の無効化、timeout を使い、自動キャンセルは後続実行で
+置き換えられる release 以外の処理に限定します。
+
+<a id="adopting-the-template"></a>
+
+## テンプレートの導入
+
+新しいプロジェクトを作ったときに一度行い、公開を有効にする前に確認します。
+
+1. `pyproject.toml` の配布名、説明、version、URL、console script を設定し、
+   ライセンスが適切か確認します。
+2. import 名を変えるなら `src/template_python/` を改名し、import、テストの参照、
+   script の参照先、モジュール起動コマンド、coverage などのツール設定も揃えます。
+   型付きパッケージの `py.typed` は維持します。
+3. 設定の既定値、`.env.template`、Notebook の例、Makefile の配布物検証コマンドと
+   image の既定値、Dockerfile の起動先と label、Compose、Dev Container 名、
+   docs の URL、Workflow の image 名、README の badge を更新します。
+   配布名はハイフン、Python の import 名はアンダースコアを使います。
+4. 次の表に従い不要なアセットを外し、実行できない CI の参照を残しません。
+5. `uv lock` を実行し、残したアセットを検証します。ソースの直接 import だけでなく、
+   改名後のインストール済み CLI を確認します。
+6. 残した配布 Workflow にだけ、リポジトリの公開設定と secret を用意します。
+   release tag とパッケージ version を一致させます。
+
+### 任意アセット
+
+Notebook、docs、コンテナ、registry、Azure、Dev Container は独立したサンプルです。
+別のアプリケーション動作を作らず、インストール済みパッケージを利用します。
+
+| 外すアセット | 同時に削除・更新するもの |
+| --- | --- |
+| Notebook | `notebooks/`、`notebook` 依存グループ、`jupyterlab` Make target |
+| ドキュメントサイト | `docs/`、`mkdocs.yml`、`docs` グループと Make target、両サイト公開 Workflow、`test.yaml` の docs コマンド |
+| コンテナ | Dockerfile、Compose、`.dockerignore`、Docker の Make target・変数、コンテナ検証・公開 Workflow |
+| registry 公開だけ | 不要な job または container-release Workflow。必要ならローカルのコンテナ検証は残す |
+| 手動のサイト公開だけ | `azure-static-web-app.yaml` とデプロイの説明 |
+| Dev Container | `.devcontainer/` と環境構築の説明 |
+
+依存グループを変更したら lock を再生成し、badge、リンク、ガイドの項目も同じ変更で
+整理します。認証情報を要求する未使用の Workflow を残さないでください。
+
+多言語出力が MkDocs 1 の plugin ecosystem に依存する間、MkDocs は 2 未満に
+固定します。
+
+## 変更チェックリスト
+
+- [ ] 変更の目的が1つで、上記のモジュール境界を守っている。
+- [ ] 期待する値と失敗をテストし、互換性を変える場合は明示している。
+- [ ] 依存宣言、lock、影響する配布アセットが一致している。
+- [ ] コマンドは既存 Make target を再利用し、新ツールは実際の不足を補っている。
+- [ ] 影響する英日ドキュメントを更新し、手順を重複させていない。
+- [ ] 変更した各領域の検証が成功し、必要なインストール済みパッケージの確認も行った。

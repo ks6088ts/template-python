@@ -14,9 +14,12 @@ info: ## show information
 
 .PHONY: install-deps-dev
 install-deps-dev: ## install dependencies for development
-	uv sync --locked --all-groups
-	uv run --locked prek install -f
+	uv sync --locked --group dev
 	@which actionlint || echo "install actionlint https://github.com/rhysd/actionlint"
+
+.PHONY: install-hooks
+install-hooks: ## install Git hooks
+	uv run --locked prek install -f
 
 .PHONY: install-deps-ci
 install-deps-ci: ## install dependencies for CI checks
@@ -28,42 +31,48 @@ install-deps: ## install dependencies for production
 
 .PHONY: format-check
 format-check: ## format check
-	uv run --locked ruff format --check --verbose
+	uv run --locked ruff format --check .
 
 .PHONY: format
 format: ## format code
-	uv run --locked ruff format --verbose
+	uv run --locked ruff format .
 
 .PHONY: fix
-fix: format ## apply auto-fixes
+fix: ## apply auto-fixes
 	uv run --locked ruff check --fix
+	uv run --locked ruff format .
 
 .PHONY: type-check
 type-check: ## check types with mypy
 	uv run --locked mypy --config-file pyproject.toml
 
-.PHONY: import-lint
-import-lint: ## check dependency directions with import-linter
-	uv run --locked lint-imports --config pyproject.toml
-
 .PHONY: lint
-lint: type-check import-lint ## lint
+lint: type-check ## lint
 	uv run --locked ruff check .
-	uv run --locked ty check
-	uv run --locked pyrefly check
 	actionlint
 	uv run --locked zizmor --offline --strict-collection --min-severity high .
 
 .PHONY: test
 test: ## run tests
-	uv run --locked pytest --capture=no -vv
+	uv run --locked pytest
+
+.PHONY: build
+build: ## build wheel and source distribution
+	uv build --clear
+
+.PHONY: package-check
+package-check: build ## test the built wheel and installed CLI
+	@wheel=$$(find dist -maxdepth 1 -name '*.whl' -type f -print -quit); \
+		test -n "$$wheel"; \
+		uv run --isolated --no-project --with "$$wheel" template-python hello --name Package | grep -Fx "Hello, Package!"; \
+		uv run --isolated --no-project --with "$$wheel" python -m template_python hello --name Module | grep -Fx "Hello, Module!"
 
 .PHONY: hooks-check
 hooks-check: ## check all configured hooks
 	uv run --locked prek run --all-files
 
 .PHONY: ci-test
-ci-test: install-deps-ci format-check lint test ## run CI tests
+ci-test: install-deps-ci format-check lint test package-check ## run CI tests
 
 .PHONY: update
 update: ## update packages
@@ -71,14 +80,14 @@ update: ## update packages
 
 .PHONY: jupyterlab
 jupyterlab: ## run Jupyter Lab
-	uv run --locked --group notebook jupyter lab
+	uv run --locked --no-dev --group notebook jupyter lab
 
 # ---
 # Docker
 # ---
 DOCKER_REPO_NAME ?= ks6088ts
 DOCKER_IMAGE_NAME ?= template-python
-DOCKER_COMMAND ?=
+DOCKER_COMMAND ?= hello --name Container
 
 # Tools
 HADOLINT_VERSION ?= v2.15.1
@@ -88,6 +97,7 @@ TRIVY_CACHE_VOLUME ?= template-python-trivy-cache
 .PHONY: docker-build
 docker-build: ## build Docker image
 	docker build \
+		--pull \
 		-t $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME):$(GIT_TAG) \
 		--build-arg GIT_REVISION=$(GIT_REVISION) \
 		--build-arg GIT_TAG=$(GIT_TAG) \
@@ -106,7 +116,11 @@ docker-scan: ## scan Docker image
 	docker run --rm \
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v $(TRIVY_CACHE_VOLUME):/root/.cache/trivy \
-		aquasec/trivy:$(TRIVY_VERSION) image $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME):$(GIT_TAG)
+		aquasec/trivy:$(TRIVY_VERSION) image \
+		--exit-code 1 \
+		--ignore-unfixed \
+		--severity HIGH,CRITICAL \
+		$(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME):$(GIT_TAG)
 
 .PHONY: ci-test-docker
 ci-test-docker: docker-lint docker-build docker-scan docker-run ## run CI test for Docker

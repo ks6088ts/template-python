@@ -1,35 +1,46 @@
 # template-python
 
-This repository is a template repository for Python projects.
+A typed Python 3.12+ package and CLI template. Start with the runnable example,
+then read only the guide needed for your task. Containers, notebooks, and
+deployment are optional, not prerequisites.
 
-See the [architecture and engineering guide](architecture/README.md) for the
-project map, design principles, quality gates, and contributor checklist.
+## Run the example
 
-## Dependency direction checks
-
-Install the development dependencies and run the architecture check:
+Install [uv 0.12.19](https://docs.astral.sh/uv/getting-started/installation/),
+Python 3.12+, and GNU Make. Run these commands from the repository root:
 
 ```shell
 make install-deps-dev
-make import-lint
+uv run --locked template-python hello --name Ada
+make test
 ```
 
-[import-linter](https://import-linter.readthedocs.io/) uses the layers contract
-in `pyproject.toml` to enforce the following dependency direction:
+The CLI prints:
 
 ```text
-scripts (applications) -> template_python (library)
+Hello, Ada!
 ```
 
-Modules under `scripts/` are applications that may import the
-`template_python` library. No module in `template_python` may import `scripts`
-or its child modules, directly or indirectly. This boundary also applies to
-new modules added under either directory.
+No `.env` file or virtual environment activation is required. Python 3.13 is the
+full CI baseline; 3.12 and 3.14 also have compatibility tests.
 
-Imports under `if TYPE_CHECKING:` are also checked. There are no dependency
-direction constraints between modules within the library.
+## Find the next step
 
-`make lint` and `make ci-test` include this check, and violations fail the
-existing Python 3.13 CI quality gate. The contract covers both `scripts` and
-`template_python`; tests and external-library dependencies have no additional
-constraints. Git hooks and deployment workflows are unchanged.
+| Task | Guide |
+| --- | --- |
+| Set up development, change code, and select checks | [Development](development.md) |
+| Find the right module or make a design decision | [Architecture and engineering](architecture/README.md) |
+| Set environment variables or understand CLI errors | [Configuration](development.md#configuration) |
+| Recover from a failed command | [Troubleshooting](development.md#troubleshooting) |
+| Rename the template or remove unused assets | [Adopting the template](architecture/README.md#adopting-the-template) |
+| Preview and validate these pages | [Documentation workflow](development.md#documentation) |
+
+## What to remember
+
+- Reusable behavior belongs in the core; the CLI handles settings, logging,
+  output, and exit codes.
+- `Makefile` is the command reference; use `make help` rather than memorizing
+  tool flags.
+- `pyproject.toml` declares dependencies; `uv.lock` records resolved versions.
+- Keep English and Japanese pages aligned. Do not duplicate detailed procedures
+  in the README; link to the relevant guide instead.

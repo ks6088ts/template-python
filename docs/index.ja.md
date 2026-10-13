@@ -1,36 +1,45 @@
 # template-python
 
-このリポジトリは、Python プロジェクトのためのテンプレートリポジトリです。
+Python 3.12+ 向けの、型付きパッケージ兼 CLI テンプレートです。まずサンプルを
+動かし、その後は目的に合うガイドだけを読んでください。コンテナ、Notebook、
+デプロイは任意であり、開発を始めるための前提ではありません。
 
-[アーキテクチャ・開発ガイド](architecture/README.ja.md)に、プロジェクト構成、
-設計原則、品質ゲート、変更時のチェックリストをまとめています。
+## まず動かす
 
-## 依存方向のチェック
-
-開発依存をインストールして、アーキテクチャのチェックを実行します。
+[uv 0.12.19](https://docs.astral.sh/uv/getting-started/installation/)、
+Python 3.12+、GNU Make を用意し、リポジトリのルートで実行します。
 
 ```shell
 make install-deps-dev
-make import-lint
+uv run --locked template-python hello --name Ada
+make test
 ```
 
-[import-linter](https://import-linter.readthedocs.io/) は `pyproject.toml` の
-layers 契約を使い、次の依存方向を検証します。
+CLI の出力は次のとおりです。
 
 ```text
-scripts (applications) -> template_python (library)
+Hello, Ada!
 ```
 
-`scripts/` 以下をアプリケーション層、`template_python` をライブラリ層として扱います。
-アプリケーションからライブラリへの依存は許可します。
-ライブラリ内のどのモジュールからも、`scripts` とその子モジュールへの
-直接・間接の依存は禁止します。この境界は、どちらのディレクトリに新しく追加した
-モジュールにも適用されます。
+`.env` の作成や仮想環境の有効化は不要です。CI の全検証は Python 3.13 で行い、
+3.12 と 3.14 でも互換性テストを実行します。
 
-`if TYPE_CHECKING:` 内の import も対象です。
-ライブラリ内部のモジュール間には依存方向の制約を設けません。
+## 目的から探す
 
-`make lint` と `make ci-test` にもこのチェックが含まれ、違反すると既存の
-Python 3.13 の CI 品質ゲートが失敗します。契約の対象は `scripts` と
-`template_python` の両方で、tests・外部ライブラリへの依存には追加の制約を設けません。
-Git hook とデプロイワークフローは変更しません。
+| やりたいこと | 読むガイド |
+| --- | --- |
+| 開発環境を用意し、コードを変更・検証する | [開発ガイド](development.ja.md) |
+| 変更するモジュールや設計方針を判断する | [アーキテクチャとエンジニアリング](architecture/README.ja.md) |
+| 環境変数を設定し、CLI のエラーを理解する | [設定リファレンス](development.ja.md#configuration) |
+| コマンドの失敗から復旧する | [トラブルシューティング](development.ja.md#troubleshooting) |
+| テンプレートを改名し、不要な機能を外す | [テンプレートの導入](architecture/README.ja.md#adopting-the-template) |
+| ドキュメントをプレビュー・検証する | [ドキュメントの開発](development.ja.md#documentation) |
+
+## 覚えることはこの4つ
+
+- 再利用する処理はコアへ、設定・ログ・表示・終了コードは CLI へ置きます。
+- コマンドの正本は `Makefile` です。ツールのオプションを覚える代わりに
+  `make help` を使います。
+- 依存関係の宣言は `pyproject.toml`、解決済みバージョンは `uv.lock` が管理します。
+- 英語と日本語のページを揃えます。詳細な手順を README に重複させず、
+  該当するガイドへリンクします。
