@@ -5,7 +5,8 @@ repo_url: https://github.com/ks6088ts/template-python
 repo_name: ks6088ts/template-python
 nav:
   - Home: index.md
-  - Architecture: architecture/README.md
+  - Development: development.md
+  - Engineering: architecture/README.md
 theme:
   name: material
   language: en
@@ -37,3 +38,7 @@ plugins:
         - locale: ja
           name: 日本語
           build: true
+          nav_translations:
+            Home: ホーム
+            Development: 開発ガイド
+            Engineering: エンジニアリングガイド
