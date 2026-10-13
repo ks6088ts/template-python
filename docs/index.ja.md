@@ -1,36 +1,22 @@
 # template-python
 
-このリポジトリは、Python プロジェクトのためのテンプレートリポジトリです。
-
-[アーキテクチャ・開発ガイド](architecture/README.ja.md)に、プロジェクト構成、
-設計原則、品質ゲート、変更時のチェックリストをまとめています。
-
-## 依存方向のチェック
-
-開発依存をインストールして、アーキテクチャのチェックを実行します。
+`template-python` は、Python 3.12+ 向けの最小限のパッケージ兼 CLI
+テンプレートです。
 
 ```shell
 make install-deps-dev
-make import-lint
+make ci-test
+uv run template-python hello --name Ada
 ```
 
-[import-linter](https://import-linter.readthedocs.io/) は `pyproject.toml` の
-layers 契約を使い、次の依存方向を検証します。
+`src/` layout、インストール可能な Typer CLI、`PROJECT_*` 設定を検証する
+Pydantic Settings、フォーマットとLintを担うRuff、strictな型検査を担うmypy、
+契約テストを担うpytestを採用しています。
 
-```text
-scripts (applications) -> template_python (library)
-```
+Docker/Compose、英日MkDocs、Jupyter Notebook、Dev Container、Docker Hubと
+GHCRへの公開、Azure Static Web Appsへのデプロイは任意アセットです。同じ
+パッケージとコマンドを利用しますが、不要なら個別に削除できます。
 
-`scripts/` 以下をアプリケーション層、`template_python` をライブラリ層として扱います。
-アプリケーションからライブラリへの依存は許可します。
-ライブラリ内のどのモジュールからも、`scripts` とその子モジュールへの
-直接・間接の依存は禁止します。この境界は、どちらのディレクトリに新しく追加した
-モジュールにも適用されます。
-
-`if TYPE_CHECKING:` 内の import も対象です。
-ライブラリ内部のモジュール間には依存方向の制約を設けません。
-
-`make lint` と `make ci-test` にもこのチェックが含まれ、違反すると既存の
-Python 3.13 の CI 品質ゲートが失敗します。契約の対象は `scripts` と
-`template_python` の両方で、tests・外部ライブラリへの依存には追加の制約を設けません。
-Git hook とデプロイワークフローは変更しません。
+パッケージ境界、依存関係、配布Workflowを変更する前に
+[アーキテクチャとエンジニアリングガイド](architecture/README.ja.md)を
+参照してください。

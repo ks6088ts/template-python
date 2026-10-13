@@ -1,88 +1,81 @@
 [project]
 name = "template-python"
-version = "0.0.1"
-description = "A GitHub template repository for Python"
+version = "0.0.13"
+description = "A minimal, typed Python package and CLI template"
 readme = "README.md"
-requires-python = ">=3.10"
-dependencies = [
-    "pydantic-settings>=2.9.1",
-    "python-dotenv>=1.1.0",
-    "typer>=0.16.0",
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["python", "template", "typer", "uv"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
 ]
+dependencies = [
+    "pydantic-settings>=2.15,<3",
+    "typer>=0.27,<1",
+]
+
+[project.scripts]
+template-python = "template_python.cli:app"
+
+[project.urls]
+Documentation = "https://ks6088ts-labs.github.io/template-python"
+Issues = "https://github.com/ks6088ts/template-python/issues"
+Repository = "https://github.com/ks6088ts/template-python"
 
 [dependency-groups]
 docs = [
-    "mkdocs-material>=9.6.14",
-    "mkdocs-static-i18n>=1.3.0",
+    "mkdocs>=1.6,<2",
+    "mkdocs-material>=9.7,<10",
+    "mkdocs-static-i18n>=1.3,<2",
 ]
 test = [
-    "pytest>=8.3.5",
-    "pytest-cov>=6.1.1",
+    "pytest>=9.1,<10",
+    "pytest-cov>=7.1,<8",
 ]
 dev = [
     { include-group = "test" },
-    "coverage>=7.8.0",
-    "import-linter>=2.15,<3",
-    "mypy>=2.4.0",
+    "mypy>=2.4,<3",
     "prek>=0.5.4,<0.6",
-    "pyrefly>=0.44.1",
-    "ruff>=0.11.7",
-    "ty>=0.0.1a6",
+    "ruff>=0.16.9,<0.17",
     "zizmor>=1.30.1,<2",
 ]
 notebook = [
-    "jupyterlab>=4.4.2",
+    "jupyterlab>=4.6,<5",
 ]
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.13,<0.14"]
+build-backend = "uv_build"
 
 [tool.ruff]
 line-length = 120
-target-version = "py310"
+target-version = "py312"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP"]
-ignore = ["D203"]
+select = ["B", "E", "F", "I", "PT", "RUF", "SIM", "UP"]
 
 [tool.pytest.ini_options]
-addopts = "-ra --cov=template_python"
+addopts = "-ra --cov=src/template_python"
 testpaths = ["tests"]
-pythonpath = ['.']
-log_cli = true
-log_cli_level = "INFO"
-log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
-log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
+[tool.coverage.run]
+branch = true
 
 [tool.coverage.report]
+fail_under = 95
 show_missing = true
 
-[tool.importlinter]
-root_packages = ["scripts", "template_python"]
-exclude_type_checking_imports = false
-
-[[tool.importlinter.contracts]]
-id = "application-library-layers"
-name = "Applications -> library"
-type = "layers"
-layers = [
-    "scripts",
-    "template_python",
-]
-
 [tool.mypy]
-files = ["template_python", "scripts", "tests"]
-python_version = "3.10"
+files = ["src", "tests"]
+python_version = "3.12"
 strict = true
 show_error_codes = true
 plugins = ["pydantic.mypy"]
-
-[tool.ty]
-environment = { python-version = "3.10" }
-
-[tool.pyrefly]
-project-includes = [
-    "**/*.py*",
-    "**/*.ipynb",
-]

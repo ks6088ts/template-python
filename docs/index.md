@@ -1,35 +1,21 @@
 # template-python
 
-This repository is a template repository for Python projects.
-
-See the [architecture and engineering guide](architecture/README.md) for the
-project map, design principles, quality gates, and contributor checklist.
-
-## Dependency direction checks
-
-Install the development dependencies and run the architecture check:
+`template-python` is a minimal Python 3.12+ package and CLI template.
 
 ```shell
 make install-deps-dev
-make import-lint
+make ci-test
+uv run template-python hello --name Ada
 ```
 
-[import-linter](https://import-linter.readthedocs.io/) uses the layers contract
-in `pyproject.toml` to enforce the following dependency direction:
+The package uses a `src/` layout, Typer for its installed CLI, Pydantic Settings
+for validated `PROJECT_*` configuration, Ruff for formatting and linting, mypy
+for strict type checking, and pytest for contract tests.
 
-```text
-scripts (applications) -> template_python (library)
-```
+Optional assets include Docker/Compose, bilingual MkDocs documentation, a
+Jupyter notebook, a Dev Container, Docker Hub and GHCR publishing, and Azure
+Static Web Apps deployment. They consume the same package and commands but can
+be removed independently.
 
-Modules under `scripts/` are applications that may import the
-`template_python` library. No module in `template_python` may import `scripts`
-or its child modules, directly or indirectly. This boundary also applies to
-new modules added under either directory.
-
-Imports under `if TYPE_CHECKING:` are also checked. There are no dependency
-direction constraints between modules within the library.
-
-`make lint` and `make ci-test` include this check, and violations fail the
-existing Python 3.13 CI quality gate. The contract covers both `scripts` and
-`template_python`; tests and external-library dependencies have no additional
-constraints. Git hooks and deployment workflows are unchanged.
+Read the [architecture and engineering guide](architecture/README.md) before
+changing package boundaries, dependencies, or delivery workflows.

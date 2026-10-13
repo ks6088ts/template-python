@@ -1,24 +1,21 @@
-from logging import DEBUG
-
 import pytest
-from dotenv import load_dotenv
+from pydantic import ValidationError
 
-from template_python.loggers import get_logger
 from template_python.settings import ProjectSettings
 
-logger = get_logger(__name__)
+
+def test_settings_use_prefixed_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PROJECT_NAME", "example")
+    monkeypatch.setenv("PROJECT_LOG_LEVEL", "DEBUG")
+
+    settings = ProjectSettings(_env_file=None)
+
+    assert settings.name == "example"
+    assert settings.log_level == "DEBUG"
 
 
-def test_settings(caplog: pytest.LogCaptureFixture) -> None:
-    """
-    Test that ProjectSettings loads values correctly from the .env.template file.
-    """
-    logger.info("[TEST] Running test_settings")
-    with caplog.at_level(DEBUG):
-        assert load_dotenv(
-            dotenv_path=".env.template",
-            verbose=True,
-        ), "Failed to load environment variables from .env.template"
-        settings = ProjectSettings()
-        assert settings.project_name == "template-python", "Default project name should be 'template-python'"
-        logger.debug(f"ProjectSettings initialized: {settings}")
+def test_settings_reject_invalid_log_level(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PROJECT_LOG_LEVEL", "VERBOSE")
+
+    with pytest.raises(ValidationError):
+        ProjectSettings(_env_file=None)
