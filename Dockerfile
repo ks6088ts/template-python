@@ -1,4 +1,4 @@
-FROM python:3.13-slim-trixie AS build
+FROM python:3.14-slim-trixie AS build
 
 WORKDIR /build
 
@@ -14,7 +14,7 @@ RUN uv export \
     --output-file /dist/requirements.txt \
     && uv build --wheel --out-dir /dist
 
-FROM python:3.13-slim-trixie
+FROM python:3.14-slim-trixie
 
 ARG GIT_REVISION="0000000"
 ARG GIT_TAG="0.0.0"
