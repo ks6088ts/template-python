@@ -16,8 +16,10 @@ environment. Containers, notebooks, and deployment are optional.
 
 ## Quick start
 
-Start with **Python 3.12+**, **uv 0.12.19**, and **GNU Make**. Python 3.13 is the
-full CI baseline; compatibility tests also cover 3.12 and 3.14.
+Start with **Python 3.12+**, **uv 0.13.6**, and **GNU Make** for local development.
+The current local environment uses **Python 3.13.12** and **uv 0.13.6**.
+CI pins **uv 0.12.19** and uses **Python 3.13** for the full quality gate;
+compatibility tests also cover **Python 3.12 and 3.14**.
 See the [uv installation guide](https://docs.astral.sh/uv/getting-started/installation/)
 if uv is not installed. Docker, actionlint, and deployment credentials are not
 needed to run the example or unit tests.
@@ -40,6 +42,13 @@ Hello, Ada!
 Then run `make test`. No virtual environment activation or `.env` file is
 required. The equivalent module entry point is
 `uv run --locked python -m template_python hello --name Ada`.
+
+Check the installed uv version and the Python runtime used by the project with:
+
+```shell
+uv --version
+uv run --locked python --version
+```
 
 ## Choose your next task
 
