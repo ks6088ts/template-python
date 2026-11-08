@@ -27,6 +27,14 @@ theme:
         name: Switch to system preference
   icon:
     repo: fontawesome/brands/github
+markdown_extensions:
+  - attr_list
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+validation:
+  anchors: warn
 plugins:
   - i18n:
       docs_structure: suffix
