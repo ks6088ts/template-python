@@ -3,7 +3,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: template-python:local
     command: ["hello", "--name", "Compose"]
     environment:
       PROJECT_LOG_LEVEL: INFO
+      PROJECT_LOG_FORMAT: json
       PROJECT_NAME: template-python-compose
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
