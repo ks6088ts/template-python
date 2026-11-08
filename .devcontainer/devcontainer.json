@@ -1,17 +1,23 @@
 {
     "name": "template-python",
-    // https://mcr.microsoft.com/en-us/product/devcontainers/python/tags
-    "image": "mcr.microsoft.com/devcontainers/python:dev-3.13-bookworm",
+    // https://mcr.microsoft.com/en-us/artifact/mar/devcontainers/python/tags
+    "image": "mcr.microsoft.com/devcontainers/python:3-3.14-trixie",
+    "features": {
+        // Run `make ci-test-docker` and other Docker-based checks against the host daemon.
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+    },
     "customizations": {
         "vscode": {
             "extensions": [
                 "charliermarsh.ruff",
-                "GitHub.copilot-chat",
+                "editorconfig.editorconfig",
+                "github.vscode-github-actions",
                 "ms-python.mypy-type-checker",
                 "ms-python.python"
             ]
         }
     },
-    "postCreateCommand": "pipx install uv==0.12.19 && make install-deps-dev",
+    // Keep the uv version within [tool.uv] required-version in pyproject.toml.
+    "postCreateCommand": "pipx install uv==0.13.7 && make install-deps-dev && make install-hooks",
     "remoteUser": "vscode"
 }
