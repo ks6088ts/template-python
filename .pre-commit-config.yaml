@@ -1,16 +1,56 @@
+# Python tools run from uv.lock so hooks, Make targets, and CI use identical versions.
+# Repository hooks below are updated by Dependabot (pre-commit ecosystem).
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-toml
       - id: check-yaml
+      - id: detect-private-key
       - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
       - id: trailing-whitespace
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.2
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
     hooks:
+      - id: gitleaks
+  - repo: local
+    hooks:
+      - id: uv-lock
+        name: uv lock --check
+        entry: uv lock --check
+        language: system
+        files: ^(pyproject\.toml|uv\.lock)$
+        pass_filenames: false
       - id: ruff-check
-        types_or: [python, pyi]
-        args: [--fix]
+        name: ruff check
+        entry: uv run --locked ruff check --fix --force-exclude
+        language: system
+        types_or: [python, pyi, jupyter]
       - id: ruff-format
+        name: ruff format
+        entry: uv run --locked ruff format --force-exclude
+        language: system
+        types_or: [python, pyi, jupyter]
+      - id: mypy
+        name: mypy
+        entry: uv run --locked mypy
+        language: system
         types_or: [python, pyi]
-exclude: "generated/.*|artifacts/.*"
+        pass_filenames: false
+      - id: actionlint
+        name: actionlint
+        entry: uv run --locked actionlint
+        language: system
+        files: ^\.github/workflows/.+\.ya?ml$
+      - id: zizmor
+        name: zizmor
+        entry: uv run --locked zizmor --offline --min-severity low .
+        language: system
+        files: ^\.github/
+        pass_filenames: false
+exclude: ^(site|dist|build)/
