@@ -39,9 +39,19 @@ install-deps-dev: ## install dependencies for development
 install-hooks: ## install Git hooks
 	uv run --locked prek install -f
 
+# actionlint-py ships only an sdist that downloads the actionlint binary from
+# GitHub Releases at build time, so retry transient network failures on a cold cache.
+SYNC_ATTEMPTS ?= 3
+
 .PHONY: install-deps-ci
 install-deps-ci: ## install dependencies for CI checks
-	uv sync --locked --group dev
+	@for attempt in $$(seq 1 $(SYNC_ATTEMPTS)); do \
+		uv sync --locked --group dev && exit 0; \
+		[ "$$attempt" -lt $(SYNC_ATTEMPTS) ] || break; \
+		echo "uv sync failed (attempt $$attempt/$(SYNC_ATTEMPTS)); retrying in $$((attempt * 10))s..." >&2; \
+		sleep $$((attempt * 10)); \
+	done; \
+	exit 1
 
 .PHONY: install-deps
 install-deps: ## install dependencies for production
