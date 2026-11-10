@@ -172,6 +172,12 @@ headings that are linked from other pages an explicit ID such as
 documentation pages. Keep onboarding in the README, procedures here, and design
 rationale in the engineering guide.
 
+The GitHub Pages workflow uploads the `github-pages` artifact in the `build`
+job, then publishes it in a separate `deploy` job with `needs: build`. Keep these
+jobs separate to avoid an artifact metadata lookup immediately after upload.
+If deployment fails after a successful upload, re-run only the failed job so
+the existing artifact is reused.
+
 ## Troubleshooting { #troubleshooting }
 
 Fix the first failing command rather than disabling checks or changing several
