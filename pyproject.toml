@@ -22,8 +22,8 @@ classifiers = [
 ]
 dependencies = [
     "pydantic>=2.12,<3",
-    "pydantic-settings>=2.15,<3",
-    "typer>=0.27,<1",
+    "pydantic-settings>=2.16.3,<3",
+    "typer>=0.29.2,<1",
 ]
 
 [project.scripts]
